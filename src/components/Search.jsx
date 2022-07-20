@@ -1,11 +1,18 @@
 import { useEffect, useState } from "react";
+import { BoxLoading } from "react-loadingg";
 import Items from "./items";
 import axios from "axios";
 function Search() {
   const [Movie, setMovie] = useState({});
   const [input, setInput] = useState([]);
+  const [Loading, setLoading] = useState(false);
+  const [Error, setError] = useState(true);
 
   useEffect(() => setMovie({}), []);
+  // useEffect(() => setFound(true), []);
+  setTimeout(() => {
+    setError("");
+  }, 3000);
 
   const handleInput = (event) => {
     setInput(event.target.value);
@@ -17,6 +24,23 @@ function Search() {
       alert("Type in a movie Name");
 
       return false;
+    } else searchMovie();
+
+    setLoading(true);
+  }
+  // const handleClick = () => {}
+  function isEmptyObject(obj) {
+    if (
+      typeof obj === "object" &&
+      obj != null &&
+      Object.keys(obj).length !== 0
+    ) {
+      // setFound(false);
+
+      console.log(Object.keys(obj).length);
+    } else {
+      // setFound(true);
+      console.log(Object.keys(obj).length);
     }
   }
 
@@ -24,16 +48,42 @@ function Search() {
     axios
       .get(url)
       .then((response) => {
+        if (response.data.Response === "False") {
+          setError(response.data.Error);
+        }
         setMovie(response.data);
+        setLoading(false);
+        isEmptyObject(Movie);
+        console.log(response);
       })
       .catch((e) => {
         console.log(e.response);
+        setError("NETWORK ERROR");
+        setLoading(false);
       });
-    validateForm();
+  };
+  const handleKeypress = (e) => {
+    if (e.keyCode === "Enter") {
+      validateForm();
+      console.log("dtfyguhkj");
+    }
   };
 
+  // const searchMovie = () => {
+  //   axios
+  //     .get(url)
+  //     .then((response) => {
+  //       setMovie(response.data);
+  //       setLoading(false);
+  //       isEmptyObject(Movie);
+  //     })
+  //     .catch((e) => {
+  //       console.log(e.response);
+  //     });
+  // };
+
   return (
-    <div className="w-full min-h-[20px] py-4  bg-blue-400 flex items-center flex-col  justify-center h-fit ">
+    <div className="w-full min-h-[20px] py-4 bg-blue-400   flex items-center flex-col  justify-center h-fit ">
       <div className="flex justify-center">
         <div className=" xl:w-96">
           <div className="input-group relative flex space-x-6  items-stretch w-full ">
@@ -44,12 +94,13 @@ function Search() {
               aria-label="Search"
               aria-describedby="button-addon2"
               onChange={handleInput}
+              onKeyPress={handleKeypress}
             />
             <button
               className="btn inline-block px-6 py-2.5 bg-blue-600 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700  focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out  items-center"
-              type="button"
+              type="submit"
               id="button-addon2"
-              onClick={searchMovie}
+              onClick={validateForm}
             >
               <svg
                 aria-hidden="true"
@@ -70,10 +121,19 @@ function Search() {
           </div>
         </div>
       </div>
+      {Loading ? (
+        <div className="relative pt-6 mt-6">
+          <BoxLoading class="abs" color="#010101" />;
+        </div>
+      ) : (
+        <div className=" pt-2  gap-4 ">
+          <Items Movie={Movie} />
+        </div>
+      )}
 
-      <div className=" pt-2  gap-4 ">
-        <Items Movie={Movie} />
-      </div>
+      {Movie && <p className="text-4xl font-bold text-red-800">{Error}</p>}
+      {/* {!Loading && <div> {Movie && <div>NOTHING WAS FOUND</div>}</div>} */}
+      {/* {!Loading && !Found && Movie && <div> NOTHING WAS FOUND </div>} */}
     </div>
   );
 }

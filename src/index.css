@@ -22,3 +22,6 @@ code {
   background-position: center;
   background-image: url(./assets/Image.jpg);
 }
+.abs {
+  position: static;
+}
